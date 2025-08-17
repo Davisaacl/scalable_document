@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual envs
+.venv/
+venv/
+
+# Env files
+.env
+.env.*
+
+# Runtime data & caches
+data/**
+.hf_cache/
+.cache/
+.pytest_cache/
+*.log
+
+# Keep dirs present
+!data/.gitkeep
+!data/index/.gitkeep
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

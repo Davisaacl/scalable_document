@@ -1,0 +1,22 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: doc-pipeline-api
+    ports:
+      - "8000:8000"
+    # Creates a repo inside a container for autoreload in dev
+    volumes:
+      - ./:/app
+      # Persists model data and cache for them to not be downloaded at the same time
+      - ./data:/app/data
+      - ./.hf_cache:/root/.cache/huggingface
+    environment:
+      - ENV=dev
+      - LOG_LEVEL=INFO
+      - DATA_DIR=/app/data
+      - INDEX_DIR=/app/data/index
+      - DB_PATH=/app/data/meta.duckdb
+      - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+      - PYTHONPATH=/app

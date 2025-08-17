@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pdfplumber
+python-docx
+sentence-transformers
+faiss-cpu
+scikit-learn
+spacy
+duckdb
+python-dotenv
+pytest
+requests
+pydantic-settings # BaseSettings is not inside pydantic
+numpy
+python-multipart
+spacy 
+joblib
