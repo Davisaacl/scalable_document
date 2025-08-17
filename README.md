@@ -12,24 +12,24 @@ A pipeline ready to use that can process documents (PDF/DOCX/JSON), extract text
 - 📦 **Dockerized** for consistent local runs.
 
 ## 📁 Project Structure
-```bash
+```text
 app/
 ├─ api/v1/
-│ ├─ routes_documents.py # /documents/upload
-│ ├─ routes_search.py # /search
-│ └─ routes_models.py # /models/ner, /models/classifier/*
+│  ├─ routes_documents.py  # /documents/upload
+│  ├─ routes_search.py     # /search
+│  └─ routes_models.py     # /models/ner, /models/classifier/*
 ├─ core/
-│ ├─ config.py # settings (pydantic-settings)
-│ └─ logging_conf.py # structured JSON logging
+│  ├─ config.py            # settings (pydantic-settings)
+│  └─ logging_conf.py      # structured JSON logging
 ├─ pipeline/
-│ ├─ parsers.py # PDF/DOCX/JSON → text blocks (extension-based detection)
-│ ├─ embedder.py # texts → embeddings (single-model SBERT)
-│ ├─ indexer.py # FAISS (FlatIP; cosine with normalized vectors)
-│ ├─ storage.py # DuckDB (documents/blocks)
-│ └─ document_models.py
+│  ├─ parsers.py           # PDF/DOCX/JSON → text blocks (extension-based)
+│  ├─ embedder.py          # texts → embeddings (single-model SBERT)
+│  ├─ indexer.py           # FAISS (FlatIP; cosine with normalized vectors)
+│  ├─ storage.py           # DuckDB (documents/blocks)
+│  └─ document_models.py
 ├─ workers/
-│ └─ tasks.py # ingestion orchestration
-└─ main.py # FastAPI app
+│  └─ tasks.py             # ingestion orchestration
+└─ main.py                 # FastAPI app
 docker/
 └─ Dockerfile
 docker-compose.yml
@@ -70,22 +70,21 @@ The first search may take a bit while models download. They’re cached under `.
 #### 1) Create sample files
 
 Windows (PowerShell):
-```bash
+```powershell
 # JSON (BOM-free)
 python -c "open('sample.json','w',encoding='utf-8').write('{\"name\":\"Demo\",\"items\":[{\"sku\":\"A1\",\"qty\":2}]}')"
 
 # DOCX with 2 paragraphs
 python -c "from docx import Document; d=Document(); d.add_paragraph('Lease contract'); d.add_paragraph('General clauses'); d.save('sample.docx')"
-
 ```
-#### 2) Upload (Swagger or curl)
-
+#### 2) Upload documents
 Swagger → `POST /documents/upload` → “Try it out” → select `sample.json` and `sample.docx`.
 
-PowerShell (single line; use `curl.exe`):
-```bash
+With command line PowerShell:
+```powershell
 curl.exe -X POST "http://localhost:8000/documents/upload" -F "files=@sample.json" -F "files=@sample.docx"
 ```
+
 Expected:
 ```json
 {
@@ -97,8 +96,8 @@ Expected:
 ```
 
 #### 3) Semantic search
-```bash
-curl.exe -X POST "http://localhost:8000/documents/upload" -F "files=@sample.json" -F "files=@sample.docx"
+```powershell
+curl.exe "http://localhost:8000/search?q=contract%20termination&k=5"
 ```
 
 ### Endpoints
@@ -108,10 +107,9 @@ curl.exe -X POST "http://localhost:8000/documents/upload" -F "files=@sample.json
 3. ```GET /search``` — query params:
    - ```q``` (str, required): query text
    - ```k``` (int, optional): top-k (default 5)
-
-4. (Optional) ```POST /models/ner``` — body ```{"text":"..."}``` → entities (label + offsets) via spaCy.
-5. (Optional) ```POST /models/classifier/train``` — body ```{"texts":[...],"labels":[...]}``` → trains TF-IDF + LinearSVC and persists it.
-6. (Optional) ```POST /models/classifier/predict``` — body ```{"texts":[...]}``` → label + (calibrated) scores per class.
+4. ```POST /models/ner``` — body ```{"text":"..."}``` → entities (label + offsets) via spaCy.
+5. ```POST /models/classifier/train``` — body ```{"texts":[...],"labels":[...]}``` → trains TF-IDF + LinearSVC and persists it.
+6. ```POST /models/classifier/predict``` — body ```{"texts":[...]}``` → label + (calibrated) scores per class.
 
 ### Configuration
 
@@ -130,11 +128,11 @@ Change **EMBEDDING_MODEL**, then re-ingest (or clear ```./data```) to rebuild th
 
 DuckDB + FAISS live under ```./data``` (mounted as a volume by compose).
 
-🧰 Local development (without Docker)
+### Local development (without Docker)
 
 Use either Docker or a local venv — avoid running both on port 8000.
 
-```bash
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -155,7 +153,7 @@ Locally
 pytest -q
 ```
 
-🧯 Troubleshooting
+### Troubleshooting
 
 Can’t open ```http://localhost:8000/docs```
 
@@ -179,7 +177,6 @@ Reader uses ```encoding="utf-8-sig"``` (BOM-tolerant). Prefer writing JSON witho
 - Change compose to ```ports: ["8080:8000"]``` and open ```http://localhost:8080```.
 
 **Reset everything (DB + index + cache)** 
-
 ```bash
 docker compose down -v
 docker compose up -d --build
@@ -196,12 +193,12 @@ docker compose up -d --build
 
 ## 1) Upload Documents
 Create sample files (optional) in Windows (PowerShell)
-```bash
+```powershell
 python -c "open('sample.json','w',encoding='utf-8').write('{\"name\":\"Demo\",\"items\":[{\"sku\":\"A1\",\"qty\":2}]}')"
 python -c "from docx import Document; d=Document(); d.add_paragraph('Lease contract'); d.add_paragraph('General clauses'); d.save('sample.docx')"
 ```
 Upload (multipart/form-data)
-```bash
+```powershell
 curl.exe -X POST "http://localhost:8000/documents/upload" -F "files=@sample.json" -F "files=@sample.docx"
 ```
 Expected:
@@ -215,12 +212,12 @@ Expected:
 ```
 ## 2) Semantic Search
 Windows
-```bash
+```powershell
 curl.exe "http://localhost:8000/search?q=contract%20termination&k=5"
 ```
 ## 3) NER
 Windows
-```bash
+```powershell
 curl.exe -X POST "http://localhost:8000/models/ner" ^
   -H "Content-Type: application/json" ^
   -d "{\"text\":\"Apple acquired Beats for $3B in 2014 in California.\"}"
@@ -228,13 +225,13 @@ curl.exe -X POST "http://localhost:8000/models/ner" ^
 ## 4) Classifier Train & Predict (Optional)
 Windows
 1. Train
-```bash
+```powershell
 curl.exe -X POST "http://localhost:8000/models/classifier/train" ^
   -H "Content-Type: application/json" ^
   -d "{\"texts\":[\"Lease contract terms\",\"Consulting invoice\"],\"labels\":[\"legal\",\"finance\"]}"
 ```
 2. Predict
-```bash
+```powershell
 curl.exe -X POST "http://localhost:8000/models/classifier/predict" ^
   -H "Content-Type: application/json" ^
   -d "{\"texts\":[\"Termination clause of the lease\",\"Payment receipt for July\"]}"
